@@ -1,0 +1,267 @@
+:root {
+    /* Bright Tone Palette */
+    --bg-color: #fcf8e3; /* Light yellow background */
+    --text-color: #4a4a4a;
+    --primary-color: #ff5e7e; /* Bright Pink */
+    --secondary-color: #00d2d3; /* Bright Cyan */
+    --accent-color: #feca57; /* Bright Yellow/Orange */
+    --card-bg: #ffffff;
+    --border-color: #ff9ff3; /* Light Pink */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: none; /* Hide default cursor */
+}
+
+body {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.8;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Background Decorations */
+.background-decorations {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.6;
+}
+
+.circle1 {
+    width: 300px;
+    height: 300px;
+    background-color: var(--primary-color);
+    top: -100px;
+    left: -100px;
+    filter: blur(80px);
+}
+
+.circle2 {
+    width: 400px;
+    height: 400px;
+    background-color: var(--secondary-color);
+    bottom: -150px;
+    right: -100px;
+    filter: blur(100px);
+}
+
+.circle3 {
+    width: 200px;
+    height: 200px;
+    background-color: var(--accent-color);
+    top: 40%;
+    right: 10%;
+    filter: blur(60px);
+}
+
+.circle4 {
+    width: 250px;
+    height: 250px;
+    background-color: var(--border-color);
+    bottom: 20%;
+    left: 5%;
+    filter: blur(70px);
+}
+
+/* Custom Cursor */
+#custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 1cm;
+    height: 1cm;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease-out;
+}
+
+.cursor-bone-circle {
+    width: 100%;
+    height: 100%;
+    /* URL-encoded SVG of a circle made of bones */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><path id="bone" d="M -10,-4 A 4,4 0 0,1 -6,-8 A 4,4 0 0,1 -2,-4 L 2,-4 A 4,4 0 0,1 6,-8 A 4,4 0 0,1 10,-4 A 4,4 0 0,1 6,0 A 4,4 0 0,1 10,4 A 4,4 0 0,1 6,8 A 4,4 0 0,1 2,4 L -2,4 A 4,4 0 0,1 -6,8 A 4,4 0 0,1 -10,4 A 4,4 0 0,1 -6,0 A 4,4 0 0,1 -10,-4 Z" /></defs><g fill="%23ff5e7e"><use href="%23bone" transform="translate(50, 15) scale(0.7) rotate(0)" /><use href="%23bone" transform="translate(75, 25) scale(0.7) rotate(45)" /><use href="%23bone" transform="translate(85, 50) scale(0.7) rotate(90)" /><use href="%23bone" transform="translate(75, 75) scale(0.7) rotate(135)" /><use href="%23bone" transform="translate(50, 85) scale(0.7) rotate(180)" /><use href="%23bone" transform="translate(25, 75) scale(0.7) rotate(225)" /><use href="%23bone" transform="translate(15, 50) scale(0.7) rotate(270)" /><use href="%23bone" transform="translate(25, 25) scale(0.7) rotate(315)" /></g></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: rotateCursor 8s linear infinite;
+}
+
+@keyframes rotateCursor {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Hover effect for links and buttons */
+a:hover ~ #custom-cursor,
+button:hover ~ #custom-cursor,
+.card:hover ~ #custom-cursor {
+    transform: translate(-50%, -50%) scale(1.5);
+}
+
+/* Layout */
+header {
+    text-align: center;
+    padding: 80px 20px 40px;
+}
+
+.profile-container {
+    display: inline-block;
+    padding: 10px;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border-radius: 50%;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.profile-container:hover {
+    transform: translateY(-10px) rotate(5deg);
+}
+
+.profile-img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid white;
+    display: block;
+}
+
+h1 {
+    color: var(--primary-color);
+    font-size: 3rem;
+    font-weight: 800;
+    text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
+    letter-spacing: 2px;
+}
+
+main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+}
+
+/* Cards */
+.card {
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 40px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+    border: 3px solid transparent;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    z-index: 10;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    border-color: var(--secondary-color);
+    box-shadow: 0 20px 40px rgba(0,210,211,0.15);
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 40px;
+    height: 40px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.card:hover::before {
+    opacity: 1;
+    transform: scale(1.5);
+}
+
+h2 {
+    color: var(--secondary-color);
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 3px dashed var(--border-color);
+    padding-bottom: 10px;
+}
+
+.icon {
+    font-size: 2.2rem;
+    margin-right: 15px;
+}
+
+.card-content p {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.highlight {
+    color: var(--primary-color);
+    font-size: 1.3em;
+    background: linear-gradient(transparent 70%, var(--accent-color) 70%);
+    padding: 0 5px;
+}
+
+/* Scroll Animation */
+.fade-in {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fade-in.appear {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+footer {
+    text-align: center;
+    padding: 30px;
+    color: var(--text-color);
+    font-weight: bold;
+    opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.2rem;
+    }
+    
+    .profile-img {
+        width: 150px;
+        height: 150px;
+    }
+
+    .card {
+        padding: 25px;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    .icon {
+        font-size: 1.8rem;
+    }
+}
