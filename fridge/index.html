@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>私の冷蔵庫 - スマート食材管理</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;700&family=Caveat:wght@700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tesseract.js -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- ヘッダー -->
+        <header>
+            <div class="logo">
+                <i data-lucide="refrigerator" class="logo-icon"></i>
+                <h1>私の冷蔵庫</h1>
+            </div>
+            <p class="subtitle">おうちの冷蔵庫をかしこく管理。画像からカンタン自動入力</p>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <main>
+            <!-- 左側: 操作パネル -->
+            <div class="control-panel">
+                <button id="add-item-btn" class="btn btn-primary">
+                    <i data-lucide="plus-circle"></i> 食材を手動で追加
+                </button>
+                <button id="scan-receipt-btn" class="btn btn-accent">
+                    <i data-lucide="receipt"></i> レシートから食材追加
+                </button>
+                <button id="scan-recipe-btn" class="btn btn-secondary">
+                    <i data-lucide="camera"></i> レシピ画像から減算
+                </button>
+                <div class="fridge-status-card">
+                    <h3>冷蔵庫のステータス</h3>
+                    <div class="status-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">肉と魚</span>
+                            <span id="meat-fish-count" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">野菜庫</span>
+                            <span id="vegetables-count" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">その他</span>
+                            <span id="others-count" class="stat-value">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中央/右側: 冷蔵庫本体（3D） -->
+            <div class="fridge-wrapper">
+                <div class="fridge-instruction">
+                    <span class="pulse-icon"><i data-lucide="hand"></i></span>
+                    冷蔵庫をタップして開けてみましょう！
+                </div>
+                
+                <div class="fridge" id="main-fridge">
+                    <!-- ドア（閉じたときの外観） -->
+                    <div class="fridge-door left-door">
+                        <div class="handle left-handle"></div>
+                        <div class="brand-logo">DAILY</div>
+                        <!-- ドアの装飾: マグネットメモ -->
+                        <div class="magnet-notes">
+                            <div class="memo-paper">
+                                <p class="memo-title">お買い物メモ</p>
+                                <ul>
+                                    <li>たまご</li>
+                                    <li>牛乳</li>
+                                    <li>豚肉</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fridge-door right-door">
+                        <div class="handle right-handle"></div>
+                        <!-- ドアの装飾: キッチンタイマー & 写真 -->
+                        <div class="kitchen-timer">
+                            <div class="timer-display">03:00</div>
+                            <div class="timer-label">TIMER</div>
+                        </div>
+                        <div class="magnet-photo">
+                            <div class="photo-frame">
+                                <div class="photo-placeholder">Family <i data-lucide="heart" class="heart-icon"></i></div>
+                            </div>
+                        </div>
+                        <div class="fridge-panel">
+                            <div class="panel-screen">
+                                <div class="temp-display">3℃</div>
+                                <div class="eco-mode">ECO</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 内部スペース -->
+                    <div class="fridge-interior">
+                        <!-- 冷蔵室上段/中段: それ以外 (調味料、飲料など) -->
+                        <div class="fridge-shelf" id="shelf-others">
+                            <div class="shelf-label"><i data-lucide="egg"></i> その他・調味料・飲料</div>
+                            <div class="shelf-items-container" id="container-others">
+                                <!-- 動的に食材が入る -->
+                            </div>
+                        </div>
+
+                        <!-- 冷蔵室下段: 肉と魚 -->
+                        <div class="fridge-shelf" id="shelf-meat-fish">
+                            <div class="shelf-label"><i data-lucide="beef"></i> 肉と魚</div>
+                            <div class="shelf-items-container" id="container-meat-fish">
+                                <!-- 動的に食材が入る -->
+                            </div>
+                        </div>
+
+                        <!-- 最下段引き出し: 野菜庫 -->
+                        <div class="fridge-shelf" id="shelf-vegetables">
+                            <div class="shelf-label"><i data-lucide="carrot"></i> 野菜庫</div>
+                            <div class="shelf-items-container" id="container-vegetables">
+                                <!-- 動的に食材が入る -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 食材追加モーダル -->
+    <div id="add-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>新しい食材を追加</h2>
+                <button class="close-btn" id="close-add-modal"><i data-lucide="x"></i></button>
+            </div>
+            <form id="add-item-form">
+                <div class="form-group">
+                    <label for="item-name">食材名</label>
+                    <input type="text" id="item-name" placeholder="例: キャベツ、豚バラ肉、醤油" required>
+                </div>
+                <div class="form-group">
+                    <label for="item-category">保存スペース</label>
+                    <select id="item-category" required>
+                        <option value="vegetables">野菜庫</option>
+                        <option value="meat-fish">肉と魚</option>
+                        <option value="others" selected>その他（調味料など）</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="item-unit-type">管理タイプ</label>
+                    <select id="item-unit-type" required>
+                        <option value="percentage">割合 (残量 %)</option>
+                        <option value="weight">重さ (残量 g / 購入時 g)</option>
+                        <option value="volume">体積 (残量 ml / 購入時 ml)</option>
+                    </select>
+                </div>
+                <div class="form-group val-input" id="total-val-group">
+                    <label for="item-total" id="total-label">購入時の量 (g または ml)</label>
+                    <input type="number" id="item-total" min="1" placeholder="例: 500">
+                </div>
+                <div class="form-group val-input">
+                    <label for="item-current" id="current-label">現在の残量</label>
+                    <input type="number" id="item-current" min="0" placeholder="例: 割合なら 100, 重さなら 500" required>
+                </div>
+                <button type="submit" class="btn btn-primary submit-btn">冷蔵庫に入れる</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- レシピ画像スキャン（OCR）モーダル -->
+    <div id="scan-modal" class="modal-overlay">
+        <div class="modal-content scan-modal-content">
+            <div class="modal-header">
+                <h2>レシピ画像から使用量を引く</h2>
+                <button class="close-btn" id="close-scan-modal"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="scan-body">
+                <!-- アップロードエリア -->
+                <div class="upload-area" id="drop-zone">
+                    <i data-lucide="upload-cloud" class="upload-icon"></i>
+                    <p>レシピの「材料リスト」画像をここにドラッグ＆ドロップ、またはクリックして選択</p>
+                    <input type="file" id="file-input" accept="image/*" style="display: none;">
+                    <div class="demo-actions">
+                        <span class="demo-or">または</span>
+                        <button type="button" id="load-demo-btn" class="btn btn-text">テスト用レシピ画像をロードする</button>
+                    </div>
+                </div>
+
+                <!-- プレビュー＆処理中表示 -->
+                <div class="preview-area" id="preview-area" style="display: none;">
+                    <div class="image-preview-box">
+                        <img id="image-preview" src="" alt="アップロードされた画像">
+                    </div>
+                    
+                    <div class="ocr-status-box" id="ocr-status-box">
+                        <div class="spinner"></div>
+                        <p id="ocr-status-text">画像を読み込んでいます...</p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" id="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OCR結果と冷蔵庫食材のマッチングリスト -->
+                <div class="matching-results-area" id="results-area" style="display: none;">
+                    <h3>画像から検出された使用食材</h3>
+                    <p class="section-desc">冷蔵庫の中身から減算する量を確認・調整してください。</p>
+                    <div class="results-table-wrapper">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>検出された食材</th>
+                                    <th>使用量 (レシピ)</th>
+                                    <th>冷蔵庫内の食材</th>
+                                    <th>現在の残量</th>
+                                    <th>使用後の残量 (予測)</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matching-tbody">
+                                <!-- JavaScriptで動的に生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="scan-actions">
+                        <button id="cancel-scan-btn" class="btn btn-secondary">キャンセル</button>
+                        <button id="apply-scan-btn" class="btn btn-primary">減算を確定する</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- レシート画像スキャン（OCR）モーダル -->
+    <div id="receipt-modal" class="modal-overlay">
+        <div class="modal-content scan-modal-content">
+            <div class="modal-header">
+                <h2>レシートから食材を追加</h2>
+                <button class="close-btn" id="close-receipt-modal"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="scan-body">
+                <!-- アップロードエリア -->
+                <div class="upload-area" id="receipt-drop-zone">
+                    <i data-lucide="receipt" class="upload-icon"></i>
+                    <p>購入したレシートの画像をここにドラッグ＆ドロップ、またはクリックして選択</p>
+                    <input type="file" id="receipt-file-input" accept="image/*" style="display: none;">
+                    <div class="demo-actions">
+                        <span class="demo-or">または</span>
+                        <button type="button" id="load-receipt-demo-btn" class="btn btn-text">テスト用レシート画像をロードする</button>
+                    </div>
+                </div>
+
+                <!-- プレビュー＆処理中表示 -->
+                <div class="preview-area" id="receipt-preview-area" style="display: none;">
+                    <div class="image-preview-box">
+                        <img id="receipt-image-preview" src="" alt="アップロードされたレシート">
+                    </div>
+                    
+                    <div class="ocr-status-box" id="receipt-ocr-status-box">
+                        <div class="spinner"></div>
+                        <p id="receipt-ocr-status-text">レシートを読み込んでいます...</p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" id="receipt-progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OCR結果と非食品除外リスト -->
+                <div class="matching-results-area" id="receipt-results-area" style="display: none;">
+                    <h3>レシートの解析結果</h3>
+                    <p class="section-desc">料理に関係のない日用品やサービスは自動的に判別し、除外（チェックオフ）されています。</p>
+                    
+                    <div class="results-table-wrapper">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th width="60">追加</th>
+                                    <th>商品名</th>
+                                    <th>判定</th>
+                                    <th>カテゴリ</th>
+                                    <th>管理タイプ</th>
+                                    <th>購入量</th>
+                                </tr>
+                            </thead>
+                            <tbody id="receipt-tbody">
+                                <!-- JavaScriptで動的に生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="scan-actions">
+                        <button id="cancel-receipt-btn" class="btn btn-secondary">キャンセル</button>
+                        <button id="apply-receipt-btn" class="btn btn-primary">選択した食材を追加する</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- トースト通知 -->
+    <div id="toast" class="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1164 @@
+/* ==========================================================================
+   1. デザインシステム & 共通設定 (日常の温かみのあるキッチン)
+   ========================================================================== */
+:root {
+    /* キッチンの色彩設計（アースカラー＆温かみ） */
+    --bg-kitchen: #f4f1ea; 
+    --fridge-body: #faf8f5;        /* アイボリーホワイト */
+    --fridge-shadow: #e2ded5;
+    --fridge-border: #dcd7cd;
+    --handle-wood: linear-gradient(to right, #b48a53 0%, #8c6239 100%); /* ウッド調 */
+    
+    --panel-bg: rgba(255, 255, 255, 0.8);
+    --panel-border: rgba(180, 170, 150, 0.2);
+    --glass-bg: rgba(255, 255, 255, 0.5);
+    
+    /* カテゴリー別アースカラー */
+    --color-meat-fish: #dd5a6f;     /* サーモンピンク/ローズテラコッタ */
+    --color-vegetables: #50a37c;    /* リーフグリーン/オリーブ */
+    --color-others: #5394be;        /* ソフトブルー/スレート */
+    --color-accent: #e09643;        /* テラコッタオレンジ (レシート用) */
+    
+    /* テキストカラー */
+    --text-primary: #374151;        /* チャコール */
+    --text-secondary: #6b7280;      /* ミディアムグレー */
+    --text-muted: #9ca3af;
+    
+    /* フォントファミリー */
+    --font-main: 'Outfit', 'Noto Sans JP', sans-serif;
+    --font-handwriting: 'Caveat', 'Noto Sans JP', sans-serif;
+    
+    --shadow-soft: 0 10px 30px rgba(100, 90, 80, 0.12);
+    --shadow-fridge: 0 25px 60px rgba(70, 65, 55, 0.25);
+    --shadow-inner-light: 0 0 40px rgba(253, 224, 71, 0.12); /* 庫内ウォームライト */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-kitchen);
+    /* キッチン壁面のタイル風模様 */
+    background-image: 
+        linear-gradient(rgba(220, 215, 200, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(220, 215, 200, 0.3) 1px, transparent 1px);
+    background-size: 50px 50px;
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 1280px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ==========================================================================
+   2. ヘッダー
+   ========================================================================== */
+header {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.logo-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    color: var(--color-vegetables);
+    filter: drop-shadow(0 2px 4px rgba(80, 163, 124, 0.3));
+}
+
+header h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #1f2937;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 400;
+}
+
+/* ==========================================================================
+   3. メインレイアウト
+   ========================================================================== */
+main {
+    display: grid;
+    grid-template-columns: 310px 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+@media (max-width: 968px) {
+    main {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+
+/* ==========================================================================
+   4. 操作パネル (左側)
+   ========================================================================== */
+.control-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: var(--shadow-soft);
+}
+
+.btn {
+    font-family: var(--font-main);
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.8rem 1.25rem;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.25s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-vegetables) 0%, #3e8462 100%);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(80, 163, 124, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(80, 163, 124, 0.45);
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, var(--color-accent) 0%, #c47c2c 100%);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(224, 150, 67, 0.3);
+}
+
+.btn-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(224, 150, 67, 0.45);
+}
+
+.btn-secondary {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    color: var(--text-primary);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.btn-secondary:hover {
+    background: #f9fafb;
+    transform: translateY(-2px);
+}
+
+.btn-text {
+    background: transparent;
+    border: none;
+    color: var(--color-others);
+    padding: 0.5rem;
+    text-decoration: underline;
+    font-size: 0.85rem;
+}
+
+.btn-text:hover {
+    color: #3b7499;
+}
+
+.fridge-status-card {
+    margin-top: 0.5rem;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 14px;
+    padding: 1.1rem;
+    border: 1px solid rgba(180, 170, 150, 0.15);
+}
+
+.fridge-status-card h3 {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.status-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+}
+
+.stat-value {
+    font-weight: 700;
+    background: rgba(180, 170, 150, 0.15);
+    color: var(--text-primary);
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    min-width: 36px;
+    text-align: center;
+    font-size: 0.8rem;
+}
+
+/* ==========================================================================
+   5. 冷蔵庫本体 (家庭用の日常冷蔵庫)
+   ========================================================================== */
+.fridge-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.fridge-instruction {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.7);
+    padding: 0.4rem 1.1rem;
+    border-radius: 20px;
+    border: 1px solid var(--panel-border);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.pulse-icon {
+    animation: hand-pulse 1.5s infinite;
+}
+
+@keyframes hand-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+.fridge {
+    position: relative;
+    width: 450px;
+    height: 640px;
+    background: var(--fridge-body);
+    border-radius: 24px;
+    box-shadow: var(--shadow-fridge);
+    border: 3px solid var(--fridge-border);
+    perspective: 1200px;
+    overflow: visible;
+}
+
+/* 冷蔵庫のドア共通設定 */
+.fridge-door {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    background: var(--fridge-body);
+    border: 2px solid var(--fridge-border);
+    z-index: 10;
+    transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    box-shadow: inset -2px -2px 10px rgba(0,0,0,0.02);
+}
+
+/* 左ドア */
+.left-door {
+    left: 0;
+    border-top-left-radius: 22px;
+    border-bottom-left-radius: 22px;
+    transform-origin: left center;
+    border-right: 1px solid var(--fridge-border);
+}
+
+/* 右ドア */
+.right-door {
+    right: 0;
+    border-top-right-radius: 22px;
+    border-bottom-right-radius: 22px;
+    transform-origin: right center;
+    border-left: 1px solid var(--fridge-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 40px;
+}
+
+/* 開いた状態のドアのトランスフォーム */
+.fridge.open .left-door {
+    transform: rotateY(-130deg);
+    box-shadow: 12px 15px 35px rgba(50, 45, 35, 0.25);
+}
+
+.fridge.open .right-door {
+    transform: rotateY(130deg);
+    box-shadow: -12px 15px 35px rgba(50, 45, 35, 0.25);
+}
+
+/* 取っ手 (木目調のバー) */
+.handle {
+    position: absolute;
+    top: 35%;
+    width: 14px;
+    height: 140px;
+    background: var(--handle-wood);
+    border-radius: 6px;
+    box-shadow: 1px 2px 4px rgba(0,0,0,0.15);
+}
+
+.left-handle {
+    right: 10px;
+}
+
+.right-handle {
+    left: 10px;
+}
+
+.brand-logo {
+    position: absolute;
+    top: 30px;
+    left: 24px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+}
+
+/* ==========================================================================
+   5-1. ドア表面の生活感パーツ (マグネットメモ、写真、タイマー)
+   ========================================================================== */
+
+/* マグネットメモ (左ドア) */
+.magnet-notes {
+    position: absolute;
+    top: 80px;
+    left: 20px;
+    transform: rotate(-3deg);
+    z-index: 12;
+}
+
+.memo-paper {
+    background: #fffdf0; /* 付箋イエロー */
+    width: 130px;
+    padding: 0.75rem;
+    box-shadow: 2px 5px 10px rgba(0,0,0,0.08);
+    border-left: 1px solid #ebe5c5;
+    position: relative;
+}
+
+/* 丸マグネットピン */
+.memo-paper::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ef4444; /* 赤いマグネット */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.memo-title {
+    font-family: var(--font-handwriting);
+    font-size: 0.95rem;
+    font-weight: 700;
+    border-bottom: 1px dashed #dcd7b5;
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.4rem;
+    color: #4b5563;
+    text-align: center;
+}
+
+.memo-paper ul {
+    list-style: none;
+    font-family: var(--font-handwriting);
+    font-size: 0.85rem;
+    color: #4b5563;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding-left: 0.25rem;
+}
+
+.memo-paper li::before {
+    content: '・';
+}
+
+/* キッチンタイマー (右ドア) */
+.kitchen-timer {
+    background: #f3f4f6;
+    border: 2px solid #d1d5db;
+    border-radius: 50%; /* 丸形タイマー */
+    width: 70px;
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 1px 3px 6px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+/* 背面に貼られた磁石の厚み表現 */
+.kitchen-timer::after {
+    content: '';
+    position: absolute;
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.03);
+    z-index: -1;
+}
+
+.timer-display {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #1f2937;
+    font-family: monospace;
+}
+
+.timer-label {
+    font-size: 0.55rem;
+    color: var(--text-muted);
+    font-weight: 700;
+}
+
+/* マグネット写真 (右ドア) */
+.magnet-photo {
+    transform: rotate(4deg);
+    margin-bottom: 2rem;
+}
+
+.photo-frame {
+    background: #fff;
+    padding: 0.4rem 0.4rem 1.2rem 0.4rem;
+    box-shadow: 2px 4px 8px rgba(0,0,0,0.07);
+    border: 1px solid #f3f4f6;
+    width: 100px;
+    position: relative;
+}
+
+/* 緑の丸マグネット */
+.photo-frame::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 40px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.photo-placeholder {
+    width: 100%;
+    height: 75px;
+    background: #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #9ca3af;
+}
+
+.heart-icon {
+    width: 10px;
+    height: 10px;
+    color: #ef4444;
+    fill: #ef4444;
+}
+
+/* スマートディスプレイ (右ドア下側) */
+.fridge-panel {
+    width: 100px;
+    background: #f9fafb;
+    border: 1px solid var(--fridge-border);
+    border-radius: 8px;
+    padding: 0.5rem;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.panel-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+}
+
+.temp-display {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.eco-mode {
+    font-size: 0.6rem;
+    background: rgba(80, 163, 124, 0.1);
+    color: var(--color-vegetables);
+    padding: 0.1rem 0.4rem;
+    border-radius: 6px;
+    font-weight: bold;
+    border: 1px solid rgba(80, 163, 124, 0.2);
+}
+
+/* ==========================================================================
+   6. 冷蔵庫内部 (ウォームライト、アースカラー)
+   ========================================================================== */
+.fridge-interior {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 22px;
+    background: #fcfbfa; /* 清潔な白い庫内 */
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.85rem;
+    z-index: 5;
+    transition: all 0.5s ease;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.06);
+    border: 3px solid var(--fridge-border);
+}
+
+/* 庫内ライトエフェクト（ウォームな電球色） */
+.fridge.open .fridge-interior {
+    box-shadow: 
+        inset 0 0 40px rgba(253, 224, 71, 0.08),
+        inset 0 0 15px rgba(0,0,0,0.03);
+}
+
+.fridge-shelf {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 12px;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid rgba(220, 215, 200, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 透明プラスチック調の棚板デザイン */
+.fridge-shelf::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, transparent 5%, rgba(83, 148, 190, 0.15) 50%, transparent 95%);
+    border-bottom: 2px solid rgba(83, 148, 190, 0.2);
+}
+
+.shelf-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+}
+
+/* 各エリア特有のラベルカラー */
+#shelf-meat-fish .shelf-label { color: var(--color-meat-fish); }
+#shelf-vegetables .shelf-label { color: var(--color-vegetables); }
+#shelf-others .shelf-label { color: var(--color-others); }
+
+/* 食材を配置するコンテナ */
+.shelf-items-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-content: flex-start;
+    overflow-y: auto;
+    flex-grow: 1;
+    padding-right: 0.15rem;
+}
+
+/* カスタムスクロールバー */
+.shelf-items-container::-webkit-scrollbar {
+    width: 4px;
+}
+.shelf-items-container::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.08);
+    border-radius: 4px;
+}
+
+/* 空表示 */
+.empty-shelf-text {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-align: center;
+    width: 100%;
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+/* ==========================================================================
+   7. 食材カード (庫内アイテム)
+   ========================================================================== */
+.item-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 0.4rem 0.6rem;
+    width: calc(50% - 0.3rem); /* 横に2列 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    transition: all 0.2s ease;
+    min-height: 72px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+@media (max-width: 480px) {
+    .item-card {
+        width: 100%;
+    }
+}
+
+.item-card:hover {
+    background: #fafaf9;
+    border-color: #d6d3d1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.25rem;
+}
+
+.item-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 110px;
+}
+
+/* カテゴリー毎の左ボーダー色 */
+.item-card.category-meat-fish { border-left: 3px solid var(--color-meat-fish); }
+.item-card.category-vegetables { border-left: 3px solid var(--color-vegetables); }
+.item-card.category-others { border-left: 3px solid var(--color-others); }
+
+/* 残量表示エリア */
+.item-body {
+    margin-top: 0.35rem;
+}
+
+.item-qty-text {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.2rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.qty-bold {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* 残量バー */
+.progress-container {
+    width: 100%;
+    height: 5px;
+    background: #f3f4f6;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+/* カテゴリー毎のバー色 */
+.category-meat-fish .progress-fill { background: var(--color-meat-fish); }
+.category-vegetables .progress-fill { background: var(--color-vegetables); }
+.category-others .progress-fill { background: var(--color-others); }
+
+/* ホバー時に現れるアクションボタン */
+.item-actions {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 9px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    border: 1px solid #d6d3d1;
+}
+
+.item-card:hover .item-actions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.action-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: #f3f4f6;
+    transform: scale(1.08);
+}
+
+.action-btn.btn-delete:hover {
+    background: #fee2e2;
+    color: #ef4444;
+    border-color: #fca5a5;
+}
+
+/* ==========================================================================
+   8. モーダル (食材追加 & レシピ画像解析)
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    background: #fff;
+    border: 1px solid var(--fridge-border);
+    border-radius: 20px;
+    padding: 1.75rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    transform: translateY(15px);
+    transition: transform 0.3s ease;
+    color: var(--text-primary);
+}
+
+.modal-overlay.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 0.75rem;
+}
+
+.modal-header h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: var(--text-primary);
+}
+
+/* フォームデザイン */
+.form-group {
+    margin-bottom: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.65rem;
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--color-vegetables);
+}
+
+.submit-btn {
+    width: 100%;
+    margin-top: 0.75rem;
+}
+
+/* ==========================================================================
+   9. 画像スキャンモーダル / レシートモーダル特有
+   ========================================================================== */
+.scan-modal-content {
+    max-width: 720px;
+    width: 90%;
+}
+
+.scan-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* ドロップゾーン */
+.upload-area {
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    background: #fafaf9;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.upload-area:hover,
+.upload-area.drag-over {
+    border-color: var(--color-vegetables);
+    background: rgba(80, 163, 124, 0.05);
+}
+
+.upload-area.receipt-area-hover:hover,
+.upload-area.receipt-area-hover.drag-over {
+    border-color: var(--color-accent);
+    background: rgba(224, 150, 67, 0.05);
+}
+
+.upload-icon {
+    width: 3rem;
+    height: 3rem;
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+}
+
+.upload-area:hover .upload-icon {
+    color: var(--color-vegetables);
+}
+
+#receipt-drop-zone:hover .upload-icon {
+    color: var(--color-accent);
+}
+
+.upload-area p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    max-width: 340px;
+}
+
+.demo-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.demo-or {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* プレビュー＆処理中 */
+.preview-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    align-items: center;
+}
+
+@media (max-width: 640px) {
+    .preview-area {
+        grid-template-columns: 1fr;
+    }
+}
+
+.image-preview-box {
+    background: #f3f4f6;
+    border-radius: 10px;
+    overflow: hidden;
+    height: 180px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #e5e7eb;
+}
+
+.image-preview-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.ocr-status-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    align-items: center;
+}
+
+.spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(0,0,0,0.05);
+    border-radius: 50%;
+    border-top-color: var(--color-vegetables);
+    animation: spin 1s ease-in-out infinite;
+}
+
+#receipt-ocr-status-box .spinner {
+    border-top-color: var(--color-accent);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-vegetables), #3e8462);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+#receipt-progress-fill {
+    background: linear-gradient(90deg, var(--color-accent), #c47c2c);
+}
+
+#ocr-status-text, #receipt-ocr-status-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* 解析結果テーブル */
+.matching-results-area {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.section-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.results-table-wrapper {
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    text-align: left;
+}
+
+.results-table th,
+.results-table td {
+    padding: 0.65rem 0.85rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.results-table th {
+    background: #f9fafb;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.results-table td {
+    color: var(--text-primary);
+}
+
+.results-table select {
+    background: #fff;
+    color: var(--text-primary);
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 0.2rem 0.4rem;
+    font-family: var(--font-main);
+}
+
+.results-table input[type="number"],
+.results-table input[type="text"] {
+    background: #fff;
+    color: var(--text-primary);
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 0.2rem 0.4rem;
+    font-family: var(--font-main);
+}
+
+/* バッジのスタイリング (食品/日用品判定) */
+.badge {
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 0.15rem 0.4rem;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.badge-food {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-excluded {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* 除外された行の不透明度 */
+.ignored-row td {
+    opacity: 0.4;
+}
+
+.scan-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+/* ==========================================================================
+   10. トースト通知
+   ========================================================================== */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #fff;
+    border: 2px solid var(--color-vegetables);
+    color: var(--text-primary);
+    padding: 0.8rem 1.25rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow-soft);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
