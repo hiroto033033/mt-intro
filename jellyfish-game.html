@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jellyfish Anti-Gravity</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            /* 深い紺色のグラデーション */
+            background: linear-gradient(135deg, #000005 0%, #00001a 50%, #001033 100%);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        canvas {
+            display: block;
+        }
+        #ui {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            color: rgba(255, 255, 255, 0.9);
+            pointer-events: none;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            transition: opacity 1s ease;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 32px;
+            font-weight: 200;
+            letter-spacing: 4px;
+        }
+        p {
+            margin: 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.8;
+            letter-spacing: 1px;
+        }
+        .instruction {
+            margin-top: 20px;
+            font-size: 12px;
+            color: rgba(0, 200, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <h1 id="title">JELLYFISH</h1>
+        <p id="desc">Deep Blue Anti-Gravity</p>
+        <div class="instruction">
+            [ Mouse Move ] : Create Ocean Current<br>
+            [ Click ] : Anti-Gravity Bounce
+        </div>
+    </div>
+
+    <!-- 外部ライブラリをESモジュールとして読み込むための設定 -->
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- コア変数の宣言 ---
+        let scene, camera, renderer;
+        let jellyfish, trailLine;
+        
+        // 物理演算用
+        let jellyfishVel = new THREE.Vector3(0, 0, 0);
+        let currentForce = new THREE.Vector3(0, 0, 0);
+        
+        // 演出状態
+        let timeScale = 1.0;
+        let targetTimeScale = 1.0;
+        let jellyfishSize = 1.0;
+        let jellyfishHue = 0.6; // 初期色は青系
+        let isGameOver = false;
+
+        // 軌跡用データ
+        const trailPositions = [];
+        const MAX_TRAIL = 40;
+        
+        // エンティティリスト
+        let items = [];
+        let obstacles = [];
+        let ripples = [];
+        let explosionParticles = null;
+
+        const clock = new THREE.Clock();
+        let mouse = new THREE.Vector2();
+        let lastMouse = new THREE.Vector2();
+        let mouseDelta = new THREE.Vector2();
+
+        // --- 初期化とループ開始 ---
+        init();
+        animate();
+
+        function init() {
+            // シーンのセットアップ
+            scene = new THREE.Scene();
+            // 背景のグラデーション（CSS）と馴染ませるためのフォグ
+            scene.fog = new THREE.FogExp2(0x00001a, 0.012);
+
+            // カメラの設定
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0, 25);
+
+            // レンダラーの設定（背景を透過させてCSSグラデーションを見せる）
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            document.body.appendChild(renderer.domElement);
+
+            // ライトの設定
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(10, 20, 10);
+            scene.add(dirLight);
+
+            // クラゲの作成（ローポリゴン）
+            const geo = new THREE.IcosahedronGeometry(1, 1); 
+            const mat = new THREE.MeshPhongMaterial({
+                color: new THREE.Color().setHSL(jellyfishHue, 0.8, 0.6),
+                emissive: new THREE.Color().setHSL(jellyfishHue, 0.8, 0.3),
+                shininess: 90,
+                flatShading: true,
+                transparent: true,
+                opacity: 0.85
+            });
+            jellyfish = new THREE.Mesh(geo, mat);
+            scene.add(jellyfish);
+
+            // 軌跡（Trail）の作成
+            const trailGeo = new THREE.BufferGeometry();
+            const trailMat = new THREE.LineBasicMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.4,
+                blending: THREE.AdditiveBlending
+            });
+            const positions = new Float32Array(MAX_TRAIL * 3);
+            trailGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            trailLine = new THREE.Line(trailGeo, trailMat);
+            scene.add(trailLine);
+
+            for (let i = 0; i < MAX_TRAIL; i++) {
+                trailPositions.push(new THREE.Vector3());
+            }
+
+            // アイテムと障害物の生成
+            spawnEntities();
+
+            // イベントリスナー
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mousedown', onMouseDown);
+            // タッチデバイス対応
+            window.addEventListener('touchstart', onTouchStart, {passive: false});
+            window.addEventListener('touchmove', onTouchMove, {passive: false});
+        }
+
+        function spawnEntities() {
+            // アイテム（光の粒子）
+            const itemGeo = new THREE.IcosahedronGeometry(0.3, 0);
+            const itemMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 });
+            for (let i = 0; i < 40; i++) {
+                let mesh = new THREE.Mesh(itemGeo, itemMat);
+                resetEntityPosition(mesh, camera.position.y);
+                mesh.position.y = (Math.random() - 0.5) * 100; // 初期配置のみ散らす
+                scene.add(mesh);
+                items.push(mesh);
+            }
+
+            // 障害物（黒い物体）
+            const obsGeo = new THREE.IcosahedronGeometry(1.8, 0);
+            const obsMat = new THREE.MeshPhongMaterial({
+                color: 0x050505,
+                emissive: 0x000000,
+                flatShading: true
+            });
+            for (let i = 0; i < 25; i++) {
+                let mesh = new THREE.Mesh(obsGeo, obsMat);
+                resetEntityPosition(mesh, camera.position.y);
+                mesh.position.y = (Math.random() - 0.5) * 100;
+                mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+                scene.add(mesh);
+                obstacles.push(mesh);
+            }
+        }
+
+        function resetEntityPosition(mesh, baseY) {
+            mesh.position.set(
+                (Math.random() - 0.5) * 35, // X幅
+                baseY + 50 + Math.random() * 50, // カメラより上に配置
+                (Math.random() - 0.5) * 10 - 2 // Z奥行き
+            );
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onMouseMove(event) {
+            updateMouse(event.clientX, event.clientY);
+        }
+        
+        function onTouchMove(event) {
+            updateMouse(event.touches[0].clientX, event.touches[0].clientY);
+        }
+
+        function updateMouse(clientX, clientY) {
+            mouse.x = (clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+
+            mouseDelta.x = mouse.x - lastMouse.x;
+            mouseDelta.y = mouse.y - lastMouse.y;
+
+            // マウスの動きから海流ベクトルを生成
+            currentForce.x += mouseDelta.x * 60;
+            currentForce.y += mouseDelta.y * 60;
+
+            lastMouse.copy(mouse);
+        }
+
+        function onMouseDown() {
+            triggerAntiGravity();
+        }
+        
+        function onTouchStart(e) {
+            triggerAntiGravity();
+        }
+
+        function triggerAntiGravity() {
+            if (isGameOver) return;
+            
+            // 上方向への強い反発力と、ランダムな横方向の揺らぎ
+            jellyfishVel.y += 18;
+            jellyfishVel.x += (Math.random() - 0.5) * 6;
+            
+            // クラゲのスケールを一瞬縦長にするアニメーション（後でlerpで戻る）
+            jellyfish.scale.set(jellyfishSize * 0.7, jellyfishSize * 1.4, jellyfishSize * 0.7);
+        }
+
+        // アイテム取得時の波紋エフェクト
+        function createRipple(pos) {
+            const geo = new THREE.RingGeometry(0.1, 0.4, 32);
+            const mat = new THREE.MeshBasicMaterial({
+                color: new THREE.Color().setHSL(jellyfishHue, 0.8, 0.8),
+                transparent: true,
+                opacity: 0.8,
+                side: THREE.DoubleSide
+            });
+            const ripple = new THREE.Mesh(geo, mat);
+            ripple.position.copy(pos);
+            // カメラの方を向ける
+            ripple.lookAt(camera.position);
+            scene.add(ripple);
+            ripples.push({ mesh: ripple, life: 1.0 });
+        }
+
+        // ゲームオーバー時の崩壊パーティクルエフェクト
+        function triggerExplosion(pos) {
+            const particleCount = 300;
+            const geo = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const velocities = [];
+
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] = pos.x;
+                positions[i * 3 + 1] = pos.y;
+                positions[i * 3 + 2] = pos.z;
+
+                velocities.push(new THREE.Vector3(
+                    (Math.random() - 0.5) * 20,
+                    (Math.random() - 0.5) * 20 + 5, // 少し上方向へのバイアス
+                    (Math.random() - 0.5) * 20
+                ));
+            }
+
+            geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const mat = new THREE.PointsMaterial({
+                color: new THREE.Color().setHSL(jellyfishHue, 1.0, 0.7),
+                size: 0.6,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+
+            explosionParticles = {
+                mesh: new THREE.Points(geo, mat),
+                velocities: velocities,
+                life: 1.0
+            };
+            scene.add(explosionParticles.mesh);
+            
+            // UIの更新
+            document.getElementById('title').innerText = 'CATHARSIS';
+            document.getElementById('desc').innerText = 'Beautiful end. Refresh to dive again.';
+            document.querySelector('.instruction').style.display = 'none';
+            document.getElementById('ui').style.color = '#fff';
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            let dt = clock.getDelta();
+            if (dt > 0.1) dt = 0.1; // 巨大なスキップを防ぐ
+
+            // アイテム取得時のスローモーション処理
+            timeScale += (targetTimeScale - timeScale) * dt * 4;
+            let currentDt = dt * timeScale;
+            const time = clock.getElapsedTime();
+
+            if (!isGameOver) {
+                // --- 物理演算 ---
+                // 海流は時間経過で減衰する
+                currentForce.lerp(new THREE.Vector3(0, 0, 0), currentDt * 1.5);
+
+                // クラゲの速度に海流と微細な重力を加算
+                jellyfishVel.add(currentForce.clone().multiplyScalar(currentDt));
+                jellyfishVel.y -= 5 * currentDt; // 重力
+
+                // 抵抗（摩擦）
+                jellyfishVel.multiplyScalar(0.96);
+
+                // 位置の更新
+                jellyfish.position.add(jellyfishVel.clone().multiplyScalar(currentDt));
+
+                // アニメーション（揺らぎとスケールの復元）
+                jellyfish.rotation.y += 0.4 * currentDt;
+                jellyfish.rotation.x = Math.sin(time * 2) * 0.2;
+                jellyfish.rotation.z = Math.cos(time * 1.5) * 0.2;
+                
+                // クリック時の縦長変形から元のサイズへ戻る
+                jellyfish.scale.lerp(new THREE.Vector3(jellyfishSize, jellyfishSize, jellyfishSize), currentDt * 5);
+
+                // 画面外に出ないようにループ
+                if (jellyfish.position.x > 22) jellyfish.position.x = -22;
+                if (jellyfish.position.x < -22) jellyfish.position.x = 22;
+
+                // --- 軌跡（Trail）の更新 ---
+                trailPositions.pop();
+                trailPositions.unshift(jellyfish.position.clone());
+
+                const posAttr = trailLine.geometry.attributes.position;
+                for (let i = 0; i < MAX_TRAIL; i++) {
+                    posAttr.setXYZ(i, trailPositions[i].x, trailPositions[i].y, trailPositions[i].z);
+                }
+                posAttr.needsUpdate = true;
+                
+                // カメラの追従（なめらかにY軸のみ追従）
+                camera.position.y += (jellyfish.position.y - camera.position.y) * 0.08;
+                
+                // --- 衝突判定：アイテム ---
+                for (let i = items.length - 1; i >= 0; i--) {
+                    const item = items[i];
+                    item.rotation.y += 2 * currentDt;
+                    item.rotation.x += 1 * currentDt;
+                    
+                    // 画面下部に消えたら上部に再配置（無限ループ）
+                    if (item.position.y < camera.position.y - 20) {
+                        resetEntityPosition(item, camera.position.y);
+                    }
+
+                    if (jellyfish.position.distanceTo(item.position) < jellyfishSize + 0.6) {
+                        // アイテム吸収
+                        resetEntityPosition(item, camera.position.y);
+
+                        // 成長と色変化
+                        jellyfishSize = Math.min(jellyfishSize + 0.08, 2.5);
+                        jellyfishHue = (jellyfishHue + 0.05) % 1.0;
+                        jellyfish.material.color.setHSL(jellyfishHue, 0.9, 0.6);
+                        jellyfish.material.emissive.setHSL(jellyfishHue, 0.9, 0.3);
+                        trailLine.material.color.setHSL(jellyfishHue, 0.8, 0.5);
+
+                        // 演出：波紋とスローモーション
+                        createRipple(jellyfish.position);
+                        targetTimeScale = 0.1; // 極端にスローにする
+                        setTimeout(() => { targetTimeScale = 1.0; }, 400); // すぐに戻す
+                    }
+                }
+
+                // --- 衝突判定：障害物 ---
+                for (let i = 0; i < obstacles.length; i++) {
+                    const obs = obstacles[i];
+                    obs.rotation.x += 0.6 * currentDt;
+                    obs.rotation.y += 0.4 * currentDt;
+                    
+                    if (obs.position.y < camera.position.y - 20) {
+                        resetEntityPosition(obs, camera.position.y);
+                    }
+
+                    if (jellyfish.position.distanceTo(obs.position) < jellyfishSize + 1.2) {
+                        // 衝突 -> カタルシス（ゲームオーバー）
+                        isGameOver = true;
+                        scene.remove(jellyfish);
+                        scene.remove(trailLine);
+                        triggerExplosion(jellyfish.position);
+                    }
+                }
+            }
+
+            // 波紋の更新
+            for (let i = ripples.length - 1; i >= 0; i--) {
+                const r = ripples[i];
+                r.life -= dt * 1.5; // 波紋はスローの影響を受けずに等速で消える
+                r.mesh.scale.addScalar(dt * 8);
+                r.mesh.material.opacity = r.life;
+                if (r.life <= 0) {
+                    scene.remove(r.mesh);
+                    r.mesh.geometry.dispose();
+                    r.mesh.material.dispose();
+                    ripples.splice(i, 1);
+                }
+            }
+
+            // パーティクルの更新
+            if (explosionParticles) {
+                const positions = explosionParticles.mesh.geometry.attributes.position.array;
+                for (let i = 0; i < explosionParticles.velocities.length; i++) {
+                    let v = explosionParticles.velocities[i];
+                    v.y -= 8 * dt; // パーティクルの重力
+                    v.multiplyScalar(0.95); // 空気抵抗
+                    
+                    positions[i * 3] += v.x * dt;
+                    positions[i * 3 + 1] += v.y * dt;
+                    positions[i * 3 + 2] += v.z * dt;
+                }
+                explosionParticles.mesh.geometry.attributes.position.needsUpdate = true;
+                
+                explosionParticles.life -= dt * 0.4;
+                explosionParticles.mesh.material.opacity = explosionParticles.life;
+                
+                if (explosionParticles.life <= 0) {
+                    scene.remove(explosionParticles.mesh);
+                    explosionParticles.mesh.geometry.dispose();
+                    explosionParticles.mesh.material.dispose();
+                    explosionParticles = null;
+                }
+            }
+
+            // 描画
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
